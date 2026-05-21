@@ -131,12 +131,12 @@ export const DATE_PRICES = [
 ]
 
 export const DESTINATIONS = [
-  { name: 'Maldives',   code: 'MLE', emoji: '🏝', price: 589, currency: '£', img: 'maldives'   },
-  { name: 'Dubai',      code: 'DXB', emoji: '🌆', price: 339, currency: '£', img: 'dubai'      },
-  { name: 'New York',   code: 'JFK', emoji: '🗽', price: 389, currency: '£', img: 'newyork'    },
-  { name: 'Bali',       code: 'DPS', emoji: '🌴', price: 499, currency: '£', img: 'bali'       },
-  { name: 'Singapore',  code: 'SIN', emoji: '🌃', price: 439, currency: '£', img: 'singapore'  },
-  { name: 'Paris',      code: 'CDG', emoji: '🗼', price: 199, currency: '£', img: 'paris'      },
+  { name: 'Maldives',   code: 'MLE' , price: 589, currency: '£', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80'   },
+  { name: 'Dubai',      code: 'DXB',  price: 339, currency: '£', img: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80'      },
+  { name: 'New York',   code: 'JFK',  price: 389, currency: '£', img: 'https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=800&q=80'    },
+  { name: 'Bali',       code: 'DPS',  price: 499, currency: '£', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80'       },
+  { name: 'Singapore',  code: 'SIN',  price: 439, currency: '£', img: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?w=800&q=80'  },
+  { name: 'Paris',      code: 'CDG',  price: 199, currency: '£', img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80'      },
 ]
 
 // ─── API FUNCTIONS ─────────────────────────────────────────────────────────────

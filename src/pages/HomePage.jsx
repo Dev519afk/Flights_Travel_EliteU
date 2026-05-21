@@ -39,7 +39,7 @@ export default function HomePage() {
         {/* Background layers */}
         <div style={{
           position: 'absolute', inset: 0,
-         backgroundImage: 'url(/images/hero-bg.jpg)',
+         backgroundImage: 'url("https://images.unsplash.com/photo-1568607689150-17e625c1586e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
@@ -141,7 +141,7 @@ export default function HomePage() {
             >
               <div style={{
                 height: 130, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                backgroundImage: `url(/images/${dest.img}.jpg)`,
+                backgroundImage: `url(${dest.img})`,
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   position: 'relative',
