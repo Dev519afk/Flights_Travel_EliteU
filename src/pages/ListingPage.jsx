@@ -223,19 +223,19 @@ export default function ListingPage() {
         </div>
       </div>
 
-      {/* Two-Column Grid container with auto alignment execution */}
+      {/* STRIDED ROW FLEX CONTAINER: Prevents layout cells from ever wrapping downward */}
       <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '300px 1fr', 
-        gap: '1.5rem', 
+        display: 'flex',
+        flexDirection: 'row',
+        gap: '2rem', 
         maxWidth: 1200, 
         margin: '0 auto', 
-        padding: '2rem 1.5rem 4rem',
-        alignItems: 'start'
+        padding: '1.5rem 1.5rem 4rem',
+        alignItems: 'flex-start'
       }}>
         
-        {/* Left Sidebar Filter Container */}
-        <div style={{ width: '100%', position: 'sticky', top: '24px' }}>
+        {/* Left Fixed Width Sidebar Column */}
+        <div style={{ width: '280px', flexShrink: 0, position: 'sticky', top: '24px' }}>
           <Sidebar
             maxPrice={localMaxPrice}
             setMaxPrice={setLocalMaxPrice}
@@ -246,8 +246,8 @@ export default function ListingPage() {
           />
         </div>
 
-        {/* Right Flight Cards Result Feed Container */}
-        <div style={{ width: '100%' }}>
+        {/* Right Fluid Adaptive Flight Results Feed Column */}
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.85rem', color: '#7A7A72' }}>
               <strong style={{ color: '#1C2321' }}>{filtered.length}</strong> flights found
