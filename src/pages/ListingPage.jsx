@@ -40,7 +40,6 @@ const generateDates = (departureDateStr) => {
   })
 }
 
-// Sidebar component with interactive checkbox handlers
 function Sidebar({ maxPrice, setMaxPrice, selectedAirlines, toggleAirline, selectedStops, toggleStop }) {
   return (
     <motion.div
@@ -141,7 +140,6 @@ export default function ListingPage() {
   const { searchParams } = useBookingStore()
   const { sortBy, setSortBy } = useFlights()
 
-  // Local operational filter states to ensure immediate reactive UI changes
   const [localMaxPrice, setLocalMaxPrice] = useState(800)
   const [localAirlines, setLocalAirlines] = useState(AIRLINES.map(a => a.code))
   const [localStops, setLocalStops] = useState(['0', '1', '2'])
@@ -161,12 +159,10 @@ export default function ListingPage() {
     )
   }
 
-  // Filter evaluation logic processing
   const filtered = MOCK_FLIGHTS.filter(f => {
     const matchesPrice = f.price <= localMaxPrice
     const matchesAirline = localAirlines.includes(f.airlineCode)
     
-    // Normalizes stops data structures
     const info = (f.outbound?.stopInfo || '').toLowerCase()
     let flightStops = '0'
     if (info.includes('1 stop')) flightStops = '1'
@@ -186,7 +182,7 @@ export default function ListingPage() {
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', textAlign: 'left' }}>
           <div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.4rem', fontWeight: 700, color: '#1C2321', margin: 0 }}>
-              {searchParams.fromCode || 'MAN'} → {searchParams.toCode || 'DPS'}
+              {searchParams.fromCode || 'MAN'} → {searchParams.toCode || 'JFK'}
             </h2>
             <div style={{ fontSize: '0.8rem', color: '#7A7A72', marginTop: 4 }}>
               {formatDate(searchParams.departure)}
@@ -227,16 +223,19 @@ export default function ListingPage() {
         </div>
       </div>
 
-      {/* Main Structural Layout Layout Container Grid */}
+      {/* FIXED CONTAINER GRID: Sets clean asymmetric column definitions */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-        gap: '1.5rem', maxWidth: 1200, margin: '0 auto', 
-        padding: '0 1.5rem 4rem' 
+        gridTemplateColumns: '300px 1fr', 
+        gap: '1.5rem', 
+        maxWidth: 1200, 
+        margin: '0 auto', 
+        padding: '0 1.5rem 4rem',
+        alignItems: 'start'
       }}>
         
-        {/* Sidebar Filter Container Component */}
-        <div style={{ gridColumn: 'span 1', maxWidth: '320px', width: '100%', justifySelf: 'start' }}>
+        {/* Left Sidebar filter layout container */}
+        <div style={{ width: '100%', position: 'sticky', top: '24px' }}>
           <Sidebar
             maxPrice={localMaxPrice}
             setMaxPrice={setLocalMaxPrice}
@@ -247,8 +246,8 @@ export default function ListingPage() {
           />
         </div>
 
-        {/* Results Component Block Column */}
-        <div style={{ gridColumn: 'span 2', flexGrow: 1, width: '100%' }}>
+        {/* Right results feed stream layout column */}
+        <div style={{ width: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.85rem', color: '#7A7A72' }}>
               <strong style={{ color: '#1C2321' }}>{filtered.length}</strong> flights found
