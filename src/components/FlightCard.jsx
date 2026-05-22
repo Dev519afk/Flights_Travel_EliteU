@@ -20,11 +20,11 @@ const getFlagUrl = (airportCode) => {
 
 function LegDisplay({ leg }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, textAlign: 'left' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, width: '100%' }}>
       {/* Departure Side + Flag */}
-      <div style={{ textAlign: 'center', minWidth: 65 }}>
+      <div style={{ textAlign: 'center', minWidth: 65, flexShrink: 0 }}>
         <div style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#1C2321' }}>{leg.dep}</div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, mt: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: 4 }}>
           <img 
             src={getFlagUrl(leg.depCode)} 
             alt="Origin Country" 
@@ -35,7 +35,7 @@ function LegDisplay({ leg }) {
       </div>
 
       {/* Connection Indicator Line */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minWidth: 50 }}>
         <div style={{ fontSize: '0.72rem', color: '#7A7A72', fontWeight: 500 }}>{leg.duration}</div>
         <div style={{ width: '100%', height: 1, background: '#E2E2DC', position: 'relative' }}>
           <div style={{
@@ -43,13 +43,13 @@ function LegDisplay({ leg }) {
             width: 7, height: 7, borderRadius: '50%', background: '#7A7A72',
           }} />
         </div>
-        <div style={{ fontSize: '0.68rem', color: '#7A7A72' }}>{leg.stopInfo}</div>
+        <div style={{ fontSize: '0.68rem', color: '#7A7A72', textAlign: 'center' }}>{leg.stopInfo}</div>
       </div>
 
       {/* Arrival Side + Flag */}
-      <div style={{ textAlign: 'center', minWidth: 65 }}>
+      <div style={{ textAlign: 'center', minWidth: 65, flexShrink: 0 }}>
         <div style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#1C2321' }}>{leg.arr}</div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, mt: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: 4 }}>
           <img 
             src={getFlagUrl(leg.arrCode)} 
             alt="Destination Country" 
@@ -83,6 +83,7 @@ export default function FlightCard({ flight, index = 0 }) {
         borderRadius: 12, overflow: 'hidden',
         transition: 'border-color 0.2s, transform 0.2s, box-shadow 0.2s',
         position: 'relative',
+        width: '100%'
       }}
       whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(28,35,33,0.04)' }}
     >
@@ -99,78 +100,96 @@ export default function FlightCard({ flight, index = 0 }) {
         </div>
       )}
 
-      {/* Outbound Row */}
-      <div style={{
-        padding: '1rem 1.25rem',
-        display: 'grid',
-        gridTemplateColumns: '76px 1fr auto',
-        gap: '1rem',
+      {/* CORE WRAPPER BLOCK OVERHAUL: Outbound row converted into fluid flex boxes */}
+      <div className="responsive-container" style={{
+        padding: '1.25rem',
+        display: 'flex',
+        flexDirection: 'row',
+        gap: '1.25rem',
         alignItems: 'center',
-        paddingTop: flight.isBestValue ? '1.75rem' : '1rem',
+        paddingTop: flight.isBestValue ? '2rem' : '1.25rem',
       }}>
-        {/* Airline Logo */}
+        {/* Airline Info Logo Block */}
         <div style={{
           background: '#FAF9F6', border: '1px solid #E2E2DC',
           borderRadius: 8, padding: '6px 8px', textAlign: 'center',
           display: 'flex', flexDirection: 'column', alignItems: 'center',
-          justifyContent: 'center', gap: 3, minHeight: 48,
+          justifyContent: 'center', gap: 3, minHeight: 52, width: 76, flexShrink: 0
         }}>
-          <div style={{ fontSize: '1.1rem' }}>{flight.logo}</div>
+          <div style={{ fontSize: '1.1rem', lineHeight: 1 }}>{flight.logo}</div>
           <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#7A7A72', letterSpacing: '0.06em' }}>
             {flight.airlineCode}
           </div>
         </div>
 
-        <LegDisplay leg={flight.outbound} />
+        {/* Dynamic Flight Timeline Vector Track */}
+        <div className="responsive-main" style={{ flex: 1, display: 'flex', width: '100%' }}>
+          <LegDisplay leg={flight.outbound} />
+        </div>
 
-        {/* Pricing Actions Block */}
-        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1C2321', letterSpacing: '-0.02em' }}>
+        {/* Pricing Layout Stream Sidebar Column */}
+        <div className="responsive-sidebar" style={{ 
+          textAlign: 'right', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'stretch', 
+          gap: 2,
+          minWidth: 110,
+          flexShrink: 0
+        }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1C2321', letterSpacing: '-0.02em', textAlign: 'right' }}>
             {flight.currency}{flight.price}
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#7A7A72', marginBottom: 2 }}>per traveller</div>
+          <div style={{ fontSize: '0.68rem', color: '#7A7A72', marginBottom: 6, textAlign: 'right' }}>per traveller</div>
+          
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={handleSelect}
             style={{
               background: '#1C2321', color: '#FAF9F6', border: 'none',
-              padding: '7px 20px', borderRadius: 8, fontWeight: 700,
+              padding: '8px 20px', borderRadius: 8, fontWeight: 700,
               fontSize: '0.83rem', cursor: 'pointer',
-              whiteSpace: 'nowrap',
+              whiteSpace: 'nowrap', width: '100%',
               fontFamily: "'DM Sans', sans-serif",
             }}
           >
             Select
           </motion.button>
+          
           {flight.seatsLeft <= 5 && (
-            <div style={{ fontSize: '0.65rem', color: '#dc2626', fontWeight: 600, marginTop: 4 }}>
+            <div style={{ fontSize: '0.65rem', color: '#dc2626', fontWeight: 600, marginTop: 4, textAlign: 'center' }}>
               Only {flight.seatsLeft} seats left!
             </div>
           )}
         </div>
       </div>
 
-      {/* Return Row */}
-      <div style={{
-        borderTop: '1px dashed #E2E2DC',
-        padding: '0.75rem 1.25rem',
-        display: 'grid',
-        gridTemplateColumns: '76px 1fr auto',
-        gap: '1rem',
-        alignItems: 'center',
-      }}>
-        <div style={{ fontSize: '0.62rem', color: '#7A7A72', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700, textAlign: 'left' }}>
-          Return
+      {/* Return Row Layout Definition */}
+      {flight.inbound && (
+        <div className="responsive-container" style={{
+          borderTop: '1px dashed #E2E2DC',
+          padding: '1.25rem',
+          display: 'flex',
+          flexDirection: 'row',
+          gap: '1.25rem',
+          alignItems: 'center',
+        }}>
+          <div style={{ fontSize: '0.62rem', color: '#7A7A72', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700, textAlign: 'left', width: 76, flexShrink: 0 }}>
+            Return
+          </div>
+          <div className="responsive-main" style={{ flex: 1, display: 'flex', width: '100%' }}>
+            <LegDisplay leg={flight.inbound} />
+          </div>
+          {/* Spacer block keeping structural symmetry relative during layout scaling adjustments */}
+          <div className="responsive-sidebar" style={{ width: 110, flexShrink: 0 }} />
         </div>
-        <LegDisplay leg={flight.inbound} />
-        <div />
-      </div>
+      )}
 
-      {/* Amenities Panel */}
+      {/* Amenities Panel Footer Base */}
       <div style={{
-        padding: '0.5rem 1.25rem 0.75rem',
+        padding: '0.75rem 1.25rem',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        borderTop: '1px solid #FAF9F6'
+        borderTop: '1px solid #FAF9F6', gap: '1rem', flexWrap: 'wrap'
       }}>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {flight.amenities?.map(a => (
@@ -194,7 +213,7 @@ export default function FlightCard({ flight, index = 0 }) {
         </button>
       </div>
 
-      {/* Expanded Block */}
+      {/* Expanded Block Metadata Layer */}
       {expanded && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -202,14 +221,14 @@ export default function FlightCard({ flight, index = 0 }) {
           style={{
             borderTop: '1px solid #E2E2DC',
             padding: '0.75rem 1.25rem',
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.5rem',
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem',
             fontSize: '0.8rem', color: '#555550', textAlign: 'left', background: '#FAF9F6'
           }}
         >
           <div>✈ Airline: <span style={{ color: '#1C2321', fontWeight: 600 }}>{flight.airline}</span></div>
           <div>💺 Class: <span style={{ color: '#1C2321', fontWeight: 600 }}>{flight.cabin}</span></div>
           <div>📅 Departs: <span style={{ color: '#1C2321', fontWeight: 600 }}>{flight.outbound.depDate}</span></div>
-          <div>📅 Returns: <span style={{ color: '#1C2321', fontWeight: 600 }}>{flight.inbound.depDate}</span></div>
+          {flight.inbound && <div>📅 Returns: <span style={{ color: '#1C2321', fontWeight: 600 }}>{flight.inbound.depDate}</span></div>}
         </motion.div>
       )}
     </motion.div>

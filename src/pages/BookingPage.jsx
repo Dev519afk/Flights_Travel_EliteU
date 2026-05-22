@@ -79,7 +79,6 @@ export default function BookingPage() {
     confirmBooking
   } = useBookingStore()
   
-  // Track which traveler is currently active for selecting seats and bags
   const [activePassengerIdx, setActivePassengerIdx] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -94,7 +93,6 @@ export default function BookingPage() {
   const basePricePerTicket = flight.price
   const taxesPerTicket = 87
 
-  // Multi-passenger price breakdowns
   const totalBaseAndTaxes = (basePricePerTicket + taxesPerTicket) * passengers.length
   
   const totalBaggageFees = Object.values(selectedBaggage || {}).reduce((sum, bag) => {
@@ -146,23 +144,22 @@ export default function BookingPage() {
           <ProgressBar currentStep={2} />
         </div>
 
-        {/* Locked Grid Layout */}
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 340px', 
+        {/* OVERHAULED RESPONSIVE LAYER CONTAINER BLOCK */}
+        <div className="responsive-container" style={{ 
+          display: 'flex', 
+          flexDirection: 'row', 
           gap: '1.5rem', 
           alignItems: 'start' 
         }}>
           
-          {/* LEFT SIDE — Forms */}
-          <div style={{ width: '100%' }}>
+          {/* LEFT SIDE — Passenger Forms Input Stream Column */}
+          <div className="responsive-main" style={{ flex: 1, width: '100%', minWidth: 0 }}>
             
             {passengers.map((passenger, index) => (
               <div key={passenger.id} style={{ marginBottom: '1.5rem' }}>
                 <Card title={`Passenger #${index + 1} (${index === activePassengerIdx ? 'Active Selector' : 'Traveler'})`}>
                   
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                    {/* Active/Select Indicator state badge layout */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <button
                       type="button"
                       onClick={() => setActivePassengerIdx(index)}
@@ -185,12 +182,13 @@ export default function BookingPage() {
                     )}
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                  {/* Input form rows adapt naturally to space sizes inside auto-fit sub-grids */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
                     <FormInput label="First Name" value={passenger.firstName} onChange={v => updatePassenger(passenger.id, 'firstName', v)} placeholder="John" />
                     <FormInput label="Last Name" value={passenger.lastName} onChange={v => updatePassenger(passenger.id, 'lastName', v)} placeholder="Doe" />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
                     <FormInput label="Email Address" value={passenger.email} onChange={v => updatePassenger(passenger.id, 'email', v)} type="email" placeholder="john@example.com" />
                     <FormInput label="Phone Number" value={passenger.phone} onChange={v => updatePassenger(passenger.id, 'phone', v)} placeholder="+44 7700 900123" />
                   </div>
@@ -202,8 +200,7 @@ export default function BookingPage() {
                     <FormInput label="Passport Expiry" value={passenger.passportExpiry} onChange={v => updatePassenger(passenger.id, 'passportExpiry', v)} type="date" />
                   </div>
 
-                  {/* Micro Summary for Selected seat and bag for this specific index loop path */}
-                  <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #FAF9F6', display: 'flex', gap: '1.5rem', fontSize: '0.82rem', color: '#555550', fontWeight: 500 }}>
+                  <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #FAF9F6', display: 'flex', flexWrap: 'wrap', gap: '1.5rem', fontSize: '0.82rem', color: '#555550', fontWeight: 500 }}>
                     <div>💺 Seat allocation: <strong style={{ color: '#1C2321' }}>{selectedSeats[passenger.id]?.id || 'Not Assigned'}</strong></div>
                     <div>🧳 Checked Baggage: <strong style={{ color: '#1C2321' }}>{selectedBaggage[passenger.id] ? `${selectedBaggage[passenger.id]}kg` : 'None Included'}</strong></div>
                   </div>
@@ -211,7 +208,6 @@ export default function BookingPage() {
               </div>
             ))}
 
-            {/* Add Passenger triggering slot banner */}
             <button 
               type="button"
               onClick={addPassenger}
@@ -220,10 +216,10 @@ export default function BookingPage() {
               + Add Another Passenger to Group
             </button>
 
-            {/* Baggage Add-ons Selector Module linked dynamically to active passenger ID */}
+            {/* Baggage Add-ons Selector Module layout updates */}
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
               <Card title={`Baggage Add-ons — Customising Passenger #${activePassengerIdx + 1} (${activePassenger?.firstName || 'Traveler'})`}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                   {[
                     { kg: '20', price: '35', icon: '🧳', desc: 'Standard hold bag' },
                     { kg: '32', price: '55', icon: '🛄', desc: 'Large hold bag' },
@@ -262,14 +258,14 @@ export default function BookingPage() {
             )}
           </div>
 
-          {/* RIGHT SIDE — Persistent Summary Column */}
-          <div style={{ width: '100%', position: 'sticky', top: '100px' }}>
+          {/* RIGHT SIDE — Adaptive Summary Sidebar Column Layer */}
+          <div className="responsive-sidebar" style={{ width: '340px', flexShrink: 0, position: 'sticky', top: '24px' }}>
             <div style={{ background: '#ffffff', border: '1px solid #E2E2DC', borderRadius: 12, padding: '1.25rem', boxShadow: '0 4px 12px rgba(28,35,33,0.02)' }}>
               <h3 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid #FAF9F6', color: '#1C2321', textAlign: 'left', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Your Trip Summary
               </h3>
 
-              {/* Your Preferred Multi-Row SeatMap with Active Passenger Context Parameter */}
+              {/* Integrated active passenger context parameter Seatmap overlay */}
               <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid #E2E2DC', paddingBottom: '1.5rem' }}>
                 <SeatMap activePassengerId={activePassenger?.id} />
               </div>
@@ -287,7 +283,6 @@ export default function BookingPage() {
                 </div>
               ))}
 
-              {/* Dynamic calculations list breakdown stack */}
               <div style={{ marginTop: '0.5rem', textAlign: 'left' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.83rem', marginBottom: '0.5rem', color: '#555550', fontWeight: 500 }}>
                   <span>Base Tickets ({passengers.length} × {flight.currency}{basePricePerTicket})</span>
