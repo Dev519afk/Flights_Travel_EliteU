@@ -223,18 +223,18 @@ export default function ListingPage() {
         </div>
       </div>
 
-      {/* FIXED CONTAINER GRID: Sets clean asymmetric column definitions */}
+      {/* Two-Column Grid container with auto alignment execution */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: '300px 1fr', 
         gap: '1.5rem', 
         maxWidth: 1200, 
         margin: '0 auto', 
-        padding: '0 1.5rem 4rem',
+        padding: '2rem 1.5rem 4rem',
         alignItems: 'start'
       }}>
         
-        {/* Left Sidebar filter layout container */}
+        {/* Left Sidebar Filter Container */}
         <div style={{ width: '100%', position: 'sticky', top: '24px' }}>
           <Sidebar
             maxPrice={localMaxPrice}
@@ -246,7 +246,7 @@ export default function ListingPage() {
           />
         </div>
 
-        {/* Right results feed stream layout column */}
+        {/* Right Flight Cards Result Feed Container */}
         <div style={{ width: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.85rem', color: '#7A7A72' }}>
