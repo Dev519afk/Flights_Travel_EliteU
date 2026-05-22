@@ -9,7 +9,6 @@ export default function SearchBox({ compact = false }) {
   const navigate = useNavigate()
   const { searchParams, setSearchParams } = useBookingStore()
   
-  // Tab control state to toggle between Flights and Hotels search options
   const [searchMode, setSearchMode] = useState('flights') // 'flights' | 'hotels'
   const [tripType, setTripType] = useState(searchParams.tripType || 'Round Trip')
   const [hotelParams, setHotelParams] = useState({ destination: '', checkIn: '', checkOut: '', guests: '2 Guests' })
@@ -28,12 +27,10 @@ export default function SearchBox({ compact = false }) {
       setSearchParams({ tripType })
       navigate('/flights')
     } else {
-      // Hotel routing fallback
       navigate('/')
     }
   }
 
-  // Premium light theme input styling configuration
   const inputStyle = {
     background: '#FAF9F6',
     border: '1px solid #E2E2DC',
@@ -52,6 +49,7 @@ export default function SearchBox({ compact = false }) {
     color: '#7A7A72',
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
+    textAlign: 'left',
   }
 
   return (
@@ -61,10 +59,9 @@ export default function SearchBox({ compact = false }) {
       transition={{ duration: 0.5, delay: 0.35 }}
       style={{
         background: '#ffffff',
-        backdropFilter: 'blur(20px)',
         border: '1px solid #E2E2DC',
         borderRadius: 20,
-        padding: '1.75rem 2rem',
+        padding: '1.5rem',
         width: '100%',
         maxWidth: 860,
         margin: '0 auto',
@@ -99,11 +96,11 @@ export default function SearchBox({ compact = false }) {
         </div>
       )}
 
-      {/* Trip type sub-tabs (Only visible for Flight mode) */}
+      {/* Trip type sub-tabs - Responsive CSS grid layout */}
       {searchMode === 'flights' && !compact && (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
           marginBottom: '1.5rem',
           borderRadius: 10,
           overflow: 'hidden',
@@ -131,31 +128,27 @@ export default function SearchBox({ compact = false }) {
         </div>
       )}
 
-      {/* ── SEARCH FIELDS CONTAINER INTERCHANGEABLE FLOWS ────── */}
+      {/* ── SEARCH FIELDS CONTAINER FLUID COLUMN/ROW CONVERSIONS ────── */}
       {searchMode === 'flights' ? (
         /* FLIGHT SEARCH OPTION PANEL */
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: tripType === 'One Way'
-            ? '1fr auto 1fr 1fr auto'
-            : '1fr auto 1fr 1fr 1fr auto',
-          gap: '0.75rem',
-          alignItems: 'end',
+        <div className="responsive-container" style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: '1rem',
+          alignItems: 'stretch',
         }}>
           {/* FROM */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="responsive-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle}>From</label>
             <input
               value={searchParams.from || ''}
               onChange={e => setSearchParams({ from: e.target.value })}
               placeholder="City or airport"
               style={inputStyle}
-              onFocus={e => e.target.style.borderColor = '#1C2321'}
-              onBlur={e => e.target.style.borderColor = '#E2E2DC'}
             />
           </div>
 
-          {/* Swap */}
+          {/* Swap Button Vector Element */}
           <button
             onClick={handleSwap}
             aria-label="Swap origin and destination"
@@ -163,63 +156,56 @@ export default function SearchBox({ compact = false }) {
               width: 40, height: 40, borderRadius: '50%',
               background: 'transparent',
               border: '1px solid #1C2321',
-              color: '#1C2321', fontSize: '1rem',
+              color: '#1C2321', fontSize: '1.1rem',
               cursor: 'pointer', display: 'flex',
               alignItems: 'center', justifyContent: 'center',
-              alignSelf: 'flex-end', flexShrink: 0,
+              alignSelf: 'center', flexShrink: 0,
+              marginTop: '1.2rem',
               transition: 'all 0.2s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#1C2321'; e.currentTarget.style.color = '#FAF9F6' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#1C2321' }}
           >
             ⇄
           </button>
 
           {/* TO */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="responsive-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle}>To</label>
             <input
               value={searchParams.to || ''}
               onChange={e => setSearchParams({ to: e.target.value })}
               placeholder="City or airport"
               style={inputStyle}
-              onFocus={e => e.target.style.borderColor = '#1C2321'}
-              onBlur={e => e.target.style.borderColor = '#E2E2DC'}
             />
           </div>
 
           {/* DEPARTURE */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="responsive-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle}>Departure</label>
             <input
               type="date"
               value={searchParams.departure || ''}
               onChange={e => setSearchParams({ departure: e.target.value })}
               style={inputStyle}
-              onFocus={e => e.target.style.borderColor = '#1C2321'}
-              onBlur={e => e.target.style.borderColor = '#E2E2DC'}
             />
           </div>
 
           {/* RETURN */}
           {tripType !== 'One Way' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="responsive-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={labelStyle}>Return</label>
               <input
                 type="date"
                 value={searchParams.returnDate || ''}
                 onChange={e => setSearchParams({ returnDate: e.target.value })}
                 style={inputStyle}
-                onFocus={e => e.target.style.borderColor = '#1C2321'}
-                onBlur={e => e.target.style.borderColor = '#E2E2DC'}
               />
             </div>
           )}
 
           {/* SEARCH ACTIONS BUTTON */}
           <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleSearch}
             style={{
               background: '#1C2321', color: '#FAF9F6',
@@ -228,8 +214,8 @@ export default function SearchBox({ compact = false }) {
               fontSize: '0.95rem', cursor: 'pointer',
               whiteSpace: 'nowrap',
               fontFamily: "'DM Sans', sans-serif",
-              alignSelf: 'flex-end',
-              display: 'flex', alignItems: 'center', gap: 6,
+              marginTop: '1.2rem',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
               boxShadow: '0 4px 16px rgba(28,35,33,0.15)',
             }}
           >
@@ -238,67 +224,59 @@ export default function SearchBox({ compact = false }) {
         </div>
       ) : (
         /* HOTEL SEARCH OPTION PANEL */
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1.5fr 1fr 1fr 1fr auto',
-          gap: '0.75rem',
-          alignItems: 'end',
+        <div className="responsive-container" style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: '1rem',
+          alignItems: 'stretch',
         }}>
           {/* DESTINATION */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="responsive-main" style={{ flex: 1.5, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle}>Going To</label>
             <input
               value={hotelParams.destination}
               onChange={e => setHotelParams({ ...hotelParams, destination: e.target.value })}
               placeholder="Destination or hotel name"
               style={inputStyle}
-              onFocus={e => e.target.style.borderColor = '#1C2321'}
-              onBlur={e => e.target.style.borderColor = '#E2E2DC'}
             />
           </div>
 
           {/* CHECK IN */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="responsive-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle}>Check-In</label>
             <input
               type="date"
               value={hotelParams.checkIn}
               onChange={e => setHotelParams({ ...hotelParams, checkIn: e.target.value })}
               style={inputStyle}
-              onFocus={e => e.target.style.borderColor = '#1C2321'}
-              onBlur={e => e.target.style.borderColor = '#E2E2DC'}
             />
           </div>
 
           {/* CHECK OUT */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="responsive-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle}>Check-Out</label>
             <input
               type="date"
               value={hotelParams.checkOut}
               onChange={e => setHotelParams({ ...hotelParams, checkOut: e.target.value })}
               style={inputStyle}
-              onFocus={e => e.target.style.borderColor = '#1C2321'}
-              onBlur={e => e.target.style.borderColor = '#E2E2DC'}
             />
           </div>
 
           {/* GUESTS */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="responsive-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle}>Guests</label>
             <input
               value={hotelParams.guests}
               onChange={e => setHotelParams({ ...hotelParams, guests: e.target.value })}
               style={inputStyle}
-              onFocus={e => e.target.style.borderColor = '#1C2321'}
-              onBlur={e => e.target.style.borderColor = '#E2E2DC'}
             />
           </div>
 
           {/* HOTEL SEARCH TRIGGER */}
           <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleSearch}
             style={{
               background: '#1C2321', color: '#FAF9F6',
@@ -307,8 +285,8 @@ export default function SearchBox({ compact = false }) {
               fontSize: '0.95rem', cursor: 'pointer',
               whiteSpace: 'nowrap',
               fontFamily: "'DM Sans', sans-serif",
-              alignSelf: 'flex-end',
-              display: 'flex', alignItems: 'center', gap: 6,
+              marginTop: '1.2rem',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
               boxShadow: '0 4px 16px rgba(28,35,33,0.15)',
             }}
           >
@@ -317,12 +295,12 @@ export default function SearchBox({ compact = false }) {
         </div>
       )}
 
-      {/* Trust badges */}
+      {/* Trust badges floor stack layout */}
       {!compact && (
         <div style={{
           display: 'flex',
           justifyContent: 'center',
-          gap: '1.75rem',
+          gap: '1.25rem',
           paddingTop: '1.25rem',
           marginTop: '1.25rem',
           borderTop: '1px solid #E2E2DC',
@@ -336,7 +314,7 @@ export default function SearchBox({ compact = false }) {
               fontSize: '0.78rem',
               color: '#7A7A72',
             }}>
-              <span style={{ color: 'emerald', fontWeight: 700 }}>✓</span>
+              <span style={{ color: '#16a34a', fontWeight: 700 }}>✓</span>
               {t}
             </div>
           ))}

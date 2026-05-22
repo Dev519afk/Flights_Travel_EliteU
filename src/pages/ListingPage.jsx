@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import FlightCard from '../components/FlightCard'
 import { useFlights } from '../hooks/useFlights'
@@ -147,6 +147,16 @@ export default function ListingPage() {
   const dates = generateDates(searchParams.departure)
   const [activeIdx, setActiveIdx] = useState(2)
 
+  // Track viewport width for fully fluid response execution
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    handleResize() // Run layout evaluation mapping once initially
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const toggleAirline = (code) => {
     setLocalAirlines(prev => 
       prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
@@ -223,19 +233,24 @@ export default function ListingPage() {
         </div>
       </div>
 
-      {/* STRIDED ROW FLEX CONTAINER: Prevents layout cells from ever wrapping downward */}
+      {/* DYNAMIC RESPONSIVE CONTAINER ROW/COLUMN INTERACTION SWITCH */}
       <div style={{ 
         display: 'flex',
-        flexDirection: 'row',
-        gap: '2rem', 
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: '1.5rem', 
         maxWidth: 1200, 
         margin: '0 auto', 
         padding: '1.5rem 1.5rem 4rem',
-        alignItems: 'flex-start'
+        alignItems: 'stretch'
       }}>
         
-        {/* Left Fixed Width Sidebar Column */}
-        <div style={{ width: '280px', flexShrink: 0, position: 'sticky', top: '24px' }}>
+        {/* Responsive Filter Sidebar Area Wrapper */}
+        <div style={{ 
+          width: isMobile ? '100%' : '280px', 
+          flexShrink: 0, 
+          position: isMobile ? 'relative' : 'sticky', 
+          top: '24px' 
+        }}>
           <Sidebar
             maxPrice={localMaxPrice}
             setMaxPrice={setLocalMaxPrice}
@@ -246,7 +261,7 @@ export default function ListingPage() {
           />
         </div>
 
-        {/* Right Fluid Adaptive Flight Results Feed Column */}
+        {/* Fluid Adaptive Cards Component Feed Block */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.85rem', color: '#7A7A72' }}>

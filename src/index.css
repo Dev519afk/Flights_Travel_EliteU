@@ -1,20 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --navy: #0a1628;
-  --navy2: #0f1f3d;
-  --navy3: #162850;
-  --card: #111d35;
-  --card2: #152040;
-  --gold: #f0a500;
-  --gold2: #ffc53d;
-  --gold3: #ffe08a;
-  --text: #e8eaf6;
-  --muted: #7b8db0;
-  --border: #1e3060;
-  --accent: #1a73e8;
-  --green: #22c55e;
-  --red: #ef4444;
+  /* PREMIUM LIGHT THEME VARIABLES */
+  --bg-main: #FAF9F6;       /* Warm elegant cream canvas background */
+  --bg-card: #ffffff;       /* Pure white card backgrounds */
+  --text-main: #1C2321;     /* High-contrast slate graphite body/headers */
+  --text-muted: #7A7A72;    /* Soft charcoal for labels and captions */
+  --border-light: #E2E2DC;  /* Clean thin separator line borders */
+  --accent-gold: #f0a500;   /* Accent highlight color for points of interest */
+  --green-success: #16a34a; /* Validation and pricing discounts */
+  --red-error: #EF4444;     /* Warning or removal notices */
   --radius: 12px;
 }
 
@@ -29,8 +24,8 @@ html {
 }
 
 body {
-  background: var(--navy);
-  color: var(--text);
+  background: var(--bg-main);
+  color: var(--text-main);
   font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
@@ -41,19 +36,29 @@ body {
   font-family: 'Playfair Display', serif;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--navy2); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+/* Custom Scrollbar styled for clean white view aesthetics */
+::-webkit-scrollbar { 
+  width: 6px; 
+  height: 6px; 
+}
+::-webkit-scrollbar-track { 
+  background: var(--bg-main); 
+}
+::-webkit-scrollbar-thumb { 
+  background: var(--border-light); 
+  border-radius: 3px; 
+}
+::-webkit-scrollbar-thumb:hover { 
+  background: var(--text-muted); 
+}
 
-/* Range input */
+/* Range sliders unified styling rules */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
   height: 4px;
-  background: var(--border);
+  background: var(--border-light);
   border-radius: 2px;
   outline: none;
 }
@@ -62,35 +67,65 @@ input[type="range"]::-webkit-slider-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--text-main);
   cursor: pointer;
-  border: 2px solid var(--navy);
+  border: 2px solid var(--bg-card);
 }
 input[type="range"]::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--text-main);
   cursor: pointer;
-  border: 2px solid var(--navy);
+  border: 2px solid var(--bg-card);
 }
 
-/* Checkbox */
+/* Custom functional checkboxes interaction mapping */
 input[type="checkbox"] {
-  accent-color: var(--gold);
+  accent-color: var(--text-main);
   width: 15px;
   height: 15px;
   cursor: pointer;
 }
 
-/* Focus ring */
+/* Focus interactive styling outlines */
 *:focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--text-main);
   outline-offset: 2px;
 }
 
-/* Selection */
+/* Selected text interaction layer highlight */
 ::selection {
-  background: rgba(240, 165, 0, 0.3);
-  color: var(--text);
+  background: rgba(28, 35, 33, 0.1);
+  color: var(--text-main);
+}
+
+/* 📱 GLOBAL RESPONSIVE MEDIA UTILITY BREAKPOINTS */
+@media (max-width: 768px) {
+  /* Flattens adjacent inline columns into clean stack block alignments */
+  .responsive-container {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  /* Freezes sidebars relative in the natural screen scrolling layout */
+  .responsive-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+    position: relative !important;
+    top: 0 !important;
+  }
+
+  /* Extends primary dynamic data arrays across the entire viewport limit width */
+  .responsive-main {
+    width: 100% !important;
+  }
+
+  /* Enforces absolute horizontal track scrolls without text-wrapping layout distortion */
+  .mobile-scroll-x {
+    overflow-x: auto !important;
+    display: flex !important;
+    white-space: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+  }
 }
