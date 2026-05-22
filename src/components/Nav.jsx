@@ -1,92 +1,146 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const NAV_LINKS = ['Flights', 'Hotels', 'Packages', 'Holidays', 'Visas', 'More']
+const NAV_LINKS = [
+  { name: 'Flights', path: '/' },
+  { name: 'Hotels', path: '/' },
+  { name: 'Experiences', path: '/' },
+  { name: 'Holidays', path: '/' },
+  { name: 'Discover', path: '/' }
+]
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  useEffect(() => { setMenuOpen(false) }, [location])
+  useEffect(() => { 
+    setMobileMenuOpen(false) 
+  }, [location])
 
   return (
-    <motion.nav
-      initial={{ y: -60, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: scrolled ? 'rgba(10,22,40,0.98)' : 'rgba(10,22,40,0.92)',
-        backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid var(--border)',
-        padding: '0 1.5rem',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        height: 60,
-        transition: 'background 0.3s',
-      }}
-    >
-      {/* Logo */}
-      <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: '1.5rem' }}>✈</span>
-        <div>
-          <div style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: '1.1rem', color: 'var(--gold)', fontWeight: 600, lineHeight: 1.1,
-          }}>FlightsTravel</div>
-          <div style={{ fontSize: '0.65rem', color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Elite</div>
-        </div>
-      </Link>
-
-      {/* Desktop links */}
-      <ul style={{
-        display: 'flex', gap: '1.25rem', listStyle: 'none',
-        '@media(max-width:768px)': { display: 'none' },
-      }} className="nav-links-desktop">
-        {NAV_LINKS.map(link => (
-          <li key={link}>
-            <Link
-              to={link === 'Flights' ? '/flights' : '/'}
-              style={{
-                color: 'var(--muted)', fontSize: '0.85rem', textDecoration: 'none',
-                transition: 'color 0.2s',
-              }}
-              onMouseEnter={e => e.target.style.color = 'var(--gold)'}
-              onMouseLeave={e => e.target.style.color = 'var(--muted)'}
-            >
-              {link}
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      {/* Right side */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <div style={{ color: 'var(--gold)', fontSize: '0.7rem', letterSpacing: '0.05em' }}>
-            ★★★★★
+    <>
+      <motion.nav
+        initial={{ y: -10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className={`sticky top-0 z-50 w-full transition-all duration-300 px-4 sm:px-6 md:px-12 h-20 flex items-center justify-between ${
+          scrolled 
+            ? 'bg-[#FAF9F6]/95 backdrop-blur-md border-b border-[#E2E2DC] shadow-sm' 
+            : 'bg-[#FAF9F6] border-b border-[#FAF9F6]'
+        }`}
+      >
+        {/* Brand Identity / Logo */}
+        <Link to="/" className="flex items-center gap-2 group focus:outline-none shrink-0">
+          <span className="text-xl text-[#1C2321] transition-transform duration-300 group-hover:scale-105">✈</span>
+          <div className="flex flex-col">
+            <div className="font-serif text-base font-bold text-[#1C2321] tracking-tight leading-tight">
+              FlightsTravel
+            </div>
+            <div className="text-[10px] text-[#7A7A72] tracking-[0.15em] uppercase font-semibold">
+              Elite
+            </div>
           </div>
-          <div style={{ fontSize: '0.62rem', color: 'var(--muted)' }}>4.9/5 · 2,341 reviews</div>
+        </Link>
+
+        {/* Desktop Navigation Links */}
+        <ul className="hidden md:flex items-center gap-6 lg:gap-8 font-medium mx-4">
+          {NAV_LINKS.map((link) => {
+            const isActive = location.pathname === link.path && link.name === 'Flights'
+            return (
+              <li key={link.name} className="relative py-2">
+                <Link
+                  to={link.path}
+                  className={`text-sm tracking-wide transition-colors duration-200 hover:text-[#1C2321] whitespace-nowrap ${
+                    isActive ? 'text-[#1C2321] font-bold' : 'text-[#7A7A72]'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+                {isActive && (
+                  <motion.div 
+                    layoutId="activeIndicator"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#1C2321]"
+                  />
+                )}
+              </li>
+            )
+          })}
+        </ul>
+
+        {/* Right side CTA & Trust Suite */}
+        <div className="hidden md:flex items-center gap-4 lg:gap-6 shrink-0">
+          <div className="text-right hidden lg:flex flex-col justify-center">
+            <div className="text-[#4A4A42] text-xs font-bold tracking-widest leading-none">
+              ★★★★★
+            </div>
+            <div className="text-[11px] text-[#7A7A72] mt-1 whitespace-nowrap">
+              4.9/5 · 2,341 reviews
+            </div>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.01, backgroundColor: '#1C2321', color: '#FAF9F6' }}
+            whileTap={{ scale: 0.99 }}
+            className="border border-[#1C2321] text-[#1C2321] font-semibold text-xs uppercase tracking-wider px-4 lg:px-5 py-2.5 rounded-lg transition-all duration-200"
+          >
+            Plan your trip
+          </motion.button>
         </div>
-        <button style={{
-          background: 'transparent', border: '1px solid var(--border)',
-          color: 'var(--text)', padding: '6px 14px', borderRadius: 8,
-          cursor: 'pointer', fontSize: '0.82rem', fontFamily: "'DM Sans', sans-serif",
-          transition: 'all 0.2s',
-        }}
-          onMouseEnter={e => { e.target.style.borderColor = 'var(--gold)'; e.target.style.color = 'var(--gold)' }}
-          onMouseLeave={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.color = 'var(--text)' }}
+
+        {/* Mobile Menu Action Button */}
+        <button 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden flex flex-col justify-center items-center gap-1.5 w-8 h-8 focus:outline-none"
+          aria-label="Toggle Menu"
         >
-          Sign In
+          <span className={`h-0.5 w-6 bg-[#1C2321] transition-transform duration-300 ${mobileMenuOpen ? 'rotate-44 translate-y-2' : ''}`} />
+          <span className={`h-0.5 w-6 bg-[#1C2321] transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} />
+          <span className={`h-0.5 w-6 bg-[#1C2321] transition-transform duration-300 ${mobileMenuOpen ? '-rotate-44 -translate-y-2' : ''}`} />
         </button>
-      </div>
-    </motion.nav>
+      </motion.nav>
+
+      {/* Mobile Drawer Menu Overlays */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-20 left-0 w-full bg-[#FAF9F6] border-b border-[#E2E2DC] px-6 py-8 flex flex-col gap-6 z-40 shadow-lg md:hidden"
+          >
+            <ul className="flex flex-col gap-5 font-medium">
+              {NAV_LINKS.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    to={link.path}
+                    className="text-base text-[#1C2321] block py-1"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <hr className="border-[#E2E2DC]" />
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-center sm:text-left">
+                <div className="text-[#4A4A42] text-xs font-bold tracking-widest">★★★★★</div>
+                <div className="text-[11px] text-[#7A7A72] mt-0.5">4.9/5 · 2,341 reviews</div>
+              </div>
+              <button className="w-full sm:w-auto bg-[#1C2321] text-[#FAF9F6] font-semibold text-center px-6 py-3 rounded-lg text-sm shadow-sm">
+                Plan your trip
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }

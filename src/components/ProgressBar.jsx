@@ -1,53 +1,93 @@
 import React from 'react'
 
-const STEPS = ['Flights', 'Traveller Details', 'Extras', 'Payment', 'Confirmation']
+const STEPS = [
+  { step: 1, name: 'Flights' },
+  { step: 2, name: 'Traveller Details' },
+  { step: 3, name: 'Extras' },
+  { step: 4, name: 'Payment' },
+  { step: 5, name: 'Confirmation' }
+]
 
-export default function ProgressBar({ currentStep = 1 }) {
+export default function ProgressBar({ currentStep = 2 }) {
   return (
-    <div style={{
-      background: 'var(--card)', border: '1px solid var(--border)',
-      borderRadius: 12, padding: '0.9rem 1.5rem',
-      marginBottom: '1.25rem',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {STEPS.map((label, i) => {
-          const stepNum = i + 1
-          const isDone   = stepNum < currentStep
-          const isActive = stepNum === currentStep
+    <div 
+      style={{
+        background: '#ffffff',
+        border: '1px solid #E2E2DC',
+        borderRadius: 12,
+        padding: '1rem 1.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        width: '100%',
+        boxShadow: '0 4px 12px rgba(28,35,33,0.01)'
+      }}
+    >
+      {STEPS.map((s, idx) => {
+        const isCompleted = currentStep > s.step
+        const isActive = currentStep === s.step
 
-          return (
-            <React.Fragment key={label}>
-              {i > 0 && (
-                <div style={{
-                  flex: 1, height: 1,
-                  background: isDone ? 'var(--green)' : 'var(--border)',
-                  margin: '0 6px', transition: 'background 0.3s',
-                }} />
-              )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{
-                  width: 24, height: 24, borderRadius: '50%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '0.7rem', fontWeight: 700, flexShrink: 0,
-                  background: isDone ? 'var(--green)' : isActive ? 'var(--gold)' : 'var(--border)',
-                  color: isDone ? '#fff' : isActive ? '#000' : 'var(--muted)',
-                  transition: 'all 0.3s',
-                }}>
-                  {isDone ? '✓' : stepNum}
-                </div>
-                <span style={{
-                  fontSize: '0.75rem',
-                  color: isDone ? 'var(--green)' : isActive ? 'var(--text)' : 'var(--muted)',
-                  fontWeight: isActive ? 500 : 400,
-                  whiteSpace: 'nowrap',
-                }}>
-                  {label}
-                </span>
-              </div>
-            </React.Fragment>
-          )
-        })}
-      </div>
+        return (
+          <div 
+            key={s.step} 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              flexShrink: 0 
+            }}
+          >
+            {/* Step Status Indicator Circle */}
+            <div 
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                transition: 'all 0.3s',
+                background: isCompleted ? '#16a34a' : isActive ? '#1C2321' : '#FAF9F6',
+                border: `1px solid ${isActive || isCompleted ? 'transparent' : '#E2E2DC'}`,
+                color: isCompleted || isActive ? '#FAF9F6' : '#7A7A72'
+              }}
+            >
+              {isCompleted ? '✓' : s.step}
+            </div>
+
+            {/* Step Label Name Text Block */}
+            <span 
+              style={{
+                fontSize: '0.85rem',
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? '#1C2321' : '#7A7A72',
+                transition: 'color 0.3s'
+              }}
+            >
+              {s.name}
+            </span>
+
+            {/* Connecting line delimiter between steps (hidden on final step item node) */}
+            {idx < STEPS.length - 1 && (
+              <div 
+                style={{
+                  width: '2rem',
+                  height: 1,
+                  background: isCompleted ? '#16a34a' : '#E2E2DC',
+                  marginLeft: '0.5rem',
+                  display: 'none', // Fallback container auto-flows grid layout gracefully across views
+                  '@media (minWidth: 640px)': { display: 'block' }
+                }}
+                className="hidden sm:block"
+              />
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

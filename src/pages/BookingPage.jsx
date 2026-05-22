@@ -7,33 +7,37 @@ import ProgressBar from '../components/ProgressBar'
 import SeatMap from '../components/SeatMap'
 
 const inputStyle = {
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid var(--border)',
+  background: '#FAF9F6',
+  border: '1px solid #E2E2DC',
   borderRadius: 8,
-  padding: '9px 12px',
-  color: 'var(--text)',
+  padding: '11px 14px',
+  color: '#1C2321',
   fontSize: '0.88rem',
   fontFamily: "'DM Sans', sans-serif",
   width: '100%',
   outline: 'none',
-  transition: 'border-color 0.2s',
+  transition: 'border-color 0.2s, background-color 0.2s',
 }
 
 function FormInput({ label, value, onChange, type = 'text', placeholder }) {
   const [focused, setFocused] = useState(false)
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <label style={{ fontSize: '0.72rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, textAlign: 'left' }}>
+      <label style={{ fontSize: '0.72rem', color: '#7A7A72', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
         {label}
       </label>
       <input
         type={type}
-        value={value}
+        value={value || ''}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        style={{ ...inputStyle, borderColor: focused ? 'var(--gold)' : 'var(--border)' }}
+        style={{ 
+          ...inputStyle, 
+          borderColor: focused ? '#1C2321' : '#E2E2DC',
+          background: focused ? '#ffffff' : '#FAF9F6'
+        }}
       />
     </div>
   )
@@ -42,13 +46,15 @@ function FormInput({ label, value, onChange, type = 'text', placeholder }) {
 function Card({ title, children }) {
   return (
     <div style={{
-      background: 'var(--card)', border: '1px solid var(--border)',
-      borderRadius: 12, padding: '1.5rem', marginBottom: '1rem',
+      background: '#ffffff', border: '1px solid #E2E2DC',
+      borderRadius: 12, padding: '1.5rem', marginBottom: '1.25rem',
+      boxShadow: '0 4px 12px rgba(28,35,33,0.02)'
     }}>
       {title && (
         <h3 style={{
           fontSize: '1rem', fontWeight: 600, marginBottom: '1.25rem',
-          paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)',
+          paddingBottom: '0.75rem', borderBottom: '1px solid #FAF9F6',
+          color: '#1C2321', textAlign: 'left'
         }}>
           {title}
         </h3>
@@ -61,11 +67,20 @@ function Card({ title, children }) {
 export default function BookingPage() {
   const navigate = useNavigate()
   const {
-    selectedFlight, bookingDetails, setBookingDetails,
-    selectedSeat, selectedBaggage, setSelectedBaggage,
-    confirmBooking,
+    selectedFlight,
+    passengers,
+    addPassenger,
+    removePassenger,
+    updatePassenger,
+    selectedSeats,
+    setSelectedSeatForPassenger,
+    selectedBaggage,
+    setSelectedBaggageForPassenger,
+    confirmBooking
   } = useBookingStore()
-
+  
+  // Track which traveler is currently active for selecting seats and bags
+  const [activePassengerIdx, setActivePassengerIdx] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -75,21 +90,33 @@ export default function BookingPage() {
     inbound:  { dep: '18:20', arr: '08:50', depCode: 'JFK', arrCode: 'MAN', duration: '9h 30m',  stopInfo: '1 Stop · DOH', depDate: '31 May 2026' },
   }
 
-  const baseFare = flight.price
-  const taxes = 87
-  const baggageFee = selectedBaggage === '20' ? 35 : selectedBaggage === '32' ? 55 : 0
-  const total = baseFare + taxes + baggageFee
+  const activePassenger = passengers[activePassengerIdx] || passengers[0]
+  const basePricePerTicket = flight.price
+  const taxesPerTicket = 87
+
+  // Multi-passenger price breakdowns
+  const totalBaseAndTaxes = (basePricePerTicket + taxesPerTicket) * passengers.length
+  
+  const totalBaggageFees = Object.values(selectedBaggage || {}).reduce((sum, bag) => {
+    return sum + (bag === '20' ? 35 : bag === '32' ? 55 : 0)
+  }, 0)
+
+  const totalSeatUpgrades = Object.values(selectedSeats || {}).reduce((sum, seat) => {
+    return sum + (seat?.extraLegroom ? 45 : 0)
+  }, 0)
+
+  const total = totalBaseAndTaxes + totalBaggageFees + totalSeatUpgrades
 
   const handleContinue = async () => {
-    if (!bookingDetails.firstName || !bookingDetails.lastName || !bookingDetails.email) {
-      setError('Please fill in your first name, last name, and email.')
+    const incomplete = passengers.some(p => !p.firstName || !p.lastName || !p.email)
+    if (incomplete) {
+      setError('Please fill in the first name, last name, and email for all passengers.')
       return
     }
     setError(null)
     setLoading(true)
     try {
-      await createBooking({ flight, passenger: bookingDetails, seat: selectedSeat, baggage: selectedBaggage })
-      confirmBooking()
+      await confirmBooking()
       navigate('/success')
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.')
@@ -99,211 +126,211 @@ export default function BookingPage() {
   }
 
   return (
-    <div style={{ background: 'var(--navy)', minHeight: '100vh' }}>
+    <div style={{ background: '#FAF9F6', minHeight: '100vh', color: '#1C2321', fontFamily: "'DM Sans', sans-serif" }}>
+      
       {/* Header */}
-      <div style={{ background: 'var(--card2)', borderBottom: '1px solid var(--border)', padding: '1.25rem 2rem' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.4rem', marginBottom: 4 }}>Complete your booking</h2>
-          <p style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>You are moments away from your next adventure</p>
+      <div style={{ background: '#ffffff', borderBottom: '1px solid #E2E2DC', padding: '1.5rem 1.5rem' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'left' }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', fontWeight: 700, color: '#1C2321', margin: 0 }}>
+            Complete your booking
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: '#7A7A72', marginTop: 4, margin: 0 }}>
+            You are moments away from your next adventure
+          </p>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '1.5rem 2rem' }}>
-        {/* Progress bar */}
-        <ProgressBar currentStep={2} />
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '1.5rem 1.5rem' }}>
+        
+        <div style={{ marginBottom: '2rem' }}>
+          <ProgressBar currentStep={2} />
+        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 310px', gap: '1.5rem', alignItems: 'start' }}>
-          {/* LEFT — Forms */}
-          <div>
-            {/* Contact */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Card title="Contact Information">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <FormInput label="Email Address" value={bookingDetails.email} onChange={v => setBookingDetails({ email: v })} type="email" placeholder="john@example.com" />
-                  <FormInput label="Phone Number" value={bookingDetails.phone} onChange={v => setBookingDetails({ phone: v })} placeholder="+44 7700 900123" />
-                </div>
-              </Card>
-            </motion.div>
-
-            {/* Passenger */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <Card title="Passenger 1 (Adult)">
-                {/* Gender */}
-                <div style={{ display: 'flex', gap: 8, marginBottom: '1rem' }}>
-                  {['Mr', 'Mrs', 'Ms'].map(g => (
+        {/* Locked Grid Layout */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 340px', 
+          gap: '1.5rem', 
+          alignItems: 'start' 
+        }}>
+          
+          {/* LEFT SIDE — Forms */}
+          <div style={{ width: '100%' }}>
+            
+            {passengers.map((passenger, index) => (
+              <div key={passenger.id} style={{ marginBottom: '1.5rem' }}>
+                <Card title={`Passenger #${index + 1} (${index === activePassengerIdx ? 'Active Selector' : 'Traveler'})`}>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                    {/* Active/Select Indicator state badge layout */}
                     <button
-                      key={g}
-                      onClick={() => setBookingDetails({ gender: g })}
+                      type="button"
+                      onClick={() => setActivePassengerIdx(index)}
                       style={{
-                        flex: 1, padding: '8px', border: '1px solid',
-                        borderColor: bookingDetails.gender === g ? 'var(--gold)' : 'var(--border)',
-                        borderRadius: 8, background: bookingDetails.gender === g ? 'rgba(240,165,0,0.08)' : 'transparent',
-                        color: bookingDetails.gender === g ? 'var(--gold)' : 'var(--muted)',
-                        cursor: 'pointer', fontSize: '0.82rem', fontFamily: "'DM Sans', sans-serif",
-                        transition: 'all 0.2s',
+                        background: activePassengerIdx === index ? '#1C2321' : 'transparent',
+                        color: activePassengerIdx === index ? '#FAF9F6' : '#1C2321',
+                        border: '1px solid #1C2321', padding: '6px 14px', borderRadius: 8, fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer'
                       }}
                     >
-                      {g}
+                      {activePassengerIdx === index ? '✓ Selected Active Passenger' : '⚡ Click to Customise Extras'}
                     </button>
-                  ))}
-                </div>
+                    {passengers.length > 1 && (
+                      <button 
+                        type="button"
+                        onClick={() => { removePassenger(passenger.id); setActivePassengerIdx(0); }}
+                        style={{ background: 'transparent', border: 'none', color: '#EF4444', fontSize: '0.82rem', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        Remove Traveler
+                      </button>
+                    )}
+                  </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <FormInput label="First Name"       value={bookingDetails.firstName}     onChange={v => setBookingDetails({ firstName: v })}     placeholder="John" />
-                  <FormInput label="Last Name"        value={bookingDetails.lastName}      onChange={v => setBookingDetails({ lastName: v })}      placeholder="Doe" />
-                  <FormInput label="Date of Birth"    value={bookingDetails.dob}           onChange={v => setBookingDetails({ dob: v })}           type="date" />
-                  <FormInput label="Nationality"      value={bookingDetails.nationality}   onChange={v => setBookingDetails({ nationality: v })}   placeholder="British" />
-                  <FormInput label="Passport Number"  value={bookingDetails.passportNumber} onChange={v => setBookingDetails({ passportNumber: v })} placeholder="AB1234567" />
-                  <FormInput label="Passport Expiry"  value={bookingDetails.passportExpiry} onChange={v => setBookingDetails({ passportExpiry: v })} type="date" />
-                </div>
-              </Card>
-            </motion.div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    <FormInput label="First Name" value={passenger.firstName} onChange={v => updatePassenger(passenger.id, 'firstName', v)} placeholder="John" />
+                    <FormInput label="Last Name" value={passenger.lastName} onChange={v => updatePassenger(passenger.id, 'lastName', v)} placeholder="Doe" />
+                  </div>
 
-            {/* Seat map */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Card title={`Select Your Seat — Outbound: ${flight.outbound.depCode} → ${flight.outbound.arrCode}`}>
-                <SeatMap />
-              </Card>
-            </motion.div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    <FormInput label="Email Address" value={passenger.email} onChange={v => updatePassenger(passenger.id, 'email', v)} type="email" placeholder="john@example.com" />
+                    <FormInput label="Phone Number" value={passenger.phone} onChange={v => updatePassenger(passenger.id, 'phone', v)} placeholder="+44 7700 900123" />
+                  </div>
 
-            {/* Baggage */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-              <Card title="Baggage Add-ons">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+                    <FormInput label="Date of Birth" value={passenger.dob} onChange={v => updatePassenger(passenger.id, 'dob', v)} type="date" />
+                    <FormInput label="Nationality" value={passenger.nationality} onChange={v => updatePassenger(passenger.id, 'nationality', v)} placeholder="British" />
+                    <FormInput label="Passport Number" value={passenger.passportNumber} onChange={v => updatePassenger(passenger.id, 'passportNumber', v)} placeholder="AB1234567" />
+                    <FormInput label="Passport Expiry" value={passenger.passportExpiry} onChange={v => updatePassenger(passenger.id, 'passportExpiry', v)} type="date" />
+                  </div>
+
+                  {/* Micro Summary for Selected seat and bag for this specific index loop path */}
+                  <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #FAF9F6', display: 'flex', gap: '1.5rem', fontSize: '0.82rem', color: '#555550', fontWeight: 500 }}>
+                    <div>💺 Seat allocation: <strong style={{ color: '#1C2321' }}>{selectedSeats[passenger.id]?.id || 'Not Assigned'}</strong></div>
+                    <div>🧳 Checked Baggage: <strong style={{ color: '#1C2321' }}>{selectedBaggage[passenger.id] ? `${selectedBaggage[passenger.id]}kg` : 'None Included'}</strong></div>
+                  </div>
+                </Card>
+              </div>
+            ))}
+
+            {/* Add Passenger triggering slot banner */}
+            <button 
+              type="button"
+              onClick={addPassenger}
+              style={{ width: '100%', background: '#ffffff', border: '1px dashed #CBD5E1', padding: '1rem', borderRadius: 12, color: '#1C2321', fontWeight: 600, cursor: 'pointer', textAlign: 'center', marginBottom: '2rem' }}
+            >
+              + Add Another Passenger to Group
+            </button>
+
+            {/* Baggage Add-ons Selector Module linked dynamically to active passenger ID */}
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+              <Card title={`Baggage Add-ons — Customising Passenger #${activePassengerIdx + 1} (${activePassenger?.firstName || 'Traveler'})`}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   {[
-                    { kg: '20', price: '£35', icon: '🧳', desc: 'Standard hold bag' },
-                    { kg: '32', price: '£55', icon: '🛄', desc: 'Large hold bag' },
-                  ].map(b => (
-                    <div
-                      key={b.kg}
-                      onClick={() => setSelectedBaggage(selectedBaggage === b.kg ? null : b.kg)}
-                      style={{
-                        background: selectedBaggage === b.kg ? 'rgba(240,165,0,0.06)' : 'rgba(255,255,255,0.02)',
-                        border: `1px solid ${selectedBaggage === b.kg ? 'var(--gold)' : 'var(--border)'}`,
-                        borderRadius: 10, padding: '1rem', cursor: 'pointer',
-                        textAlign: 'center', transition: 'all 0.2s',
-                      }}
-                    >
-                      <div style={{ fontSize: '1.8rem', marginBottom: 6 }}>{b.icon}</div>
-                      <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: 2 }}>{b.kg}kg Checked Bag</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginBottom: 6 }}>{b.desc}</div>
-                      <div style={{ color: 'var(--gold)', fontWeight: 700, fontSize: '0.9rem' }}>+{b.price} / bag</div>
-                      {selectedBaggage === b.kg && (
-                        <div style={{ fontSize: '0.7rem', color: 'var(--green)', marginTop: 4 }}>✓ Added</div>
-                      )}
-                    </div>
-                  ))}
+                    { kg: '20', price: '35', icon: '🧳', desc: 'Standard hold bag' },
+                    { kg: '32', price: '55', icon: '🛄', desc: 'Large hold bag' },
+                  ].map(b => {
+                    const isCurrentBagSelected = selectedBaggage[activePassenger?.id] === b.kg
+                    return (
+                      <div
+                        key={b.kg}
+                        onClick={() => setSelectedBaggageForPassenger(activePassenger?.id, b.kg)}
+                        style={{
+                          background: isCurrentBagSelected ? '#FAF9F6' : '#ffffff',
+                          border: `1px solid ${isCurrentBagSelected ? '#1C2321' : '#E2E2DC'}`,
+                          borderRadius: 12, padding: '1.25rem', cursor: 'pointer',
+                          textAlign: 'center', transition: 'all 0.2s',
+                          boxShadow: isCurrentBagSelected ? '0 4px 12px rgba(0,0,0,0.02)' : 'none'
+                        }}
+                      >
+                        <div style={{ fontSize: '1.8rem', marginBottom: 6 }}>{b.icon}</div>
+                        <div style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: 2, color: '#1C2321' }}>{b.kg}kg Checked Bag</div>
+                        <div style={{ fontSize: '0.75rem', color: '#7A7A72', marginBottom: 8 }}>{b.desc}</div>
+                        <div style={{ color: '#1C2321', fontWeight: 700, fontSize: '0.9rem' }}>+{flight.currency}{b.price} / bag</div>
+                        {isCurrentBagSelected && (
+                          <div style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600, marginTop: 6 }}>✓ Added</div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               </Card>
             </motion.div>
 
             {error && (
-              <div style={{
-                background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)',
-                borderRadius: 8, padding: '0.75rem 1rem',
-                color: '#f87171', fontSize: '0.85rem', marginBottom: '1rem',
-              }}>
+              <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '0.85rem 1rem', color: '#dc2626', fontSize: '0.85rem', marginBottom: '1.25rem', textAlign: 'left', fontWeight: 500 }}>
                 ⚠ {error}
               </div>
             )}
           </div>
 
-          {/* RIGHT — Summary */}
-          <div style={{ position: 'sticky', top: 80 }}>
-            <div style={{
-              background: 'var(--card)', border: '1px solid var(--border)',
-              borderRadius: 12, padding: '1.25rem',
-            }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)' }}>
-                Your Trip
+          {/* RIGHT SIDE — Persistent Summary Column */}
+          <div style={{ width: '100%', position: 'sticky', top: '100px' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #E2E2DC', borderRadius: 12, padding: '1.25rem', boxShadow: '0 4px 12px rgba(28,35,33,0.02)' }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid #FAF9F6', color: '#1C2321', textAlign: 'left', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Your Trip Summary
               </h3>
 
-              {/* Outbound */}
+              {/* Your Preferred Multi-Row SeatMap with Active Passenger Context Parameter */}
+              <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid #E2E2DC', paddingBottom: '1.5rem' }}>
+                <SeatMap activePassengerId={activePassenger?.id} />
+              </div>
+
               {[
-                { label: 'Outbound', leg: flight.outbound },
-                { label: 'Return',   leg: flight.inbound  },
+                { label: 'Outbound Flight', leg: flight.outbound },
+                { label: 'Return Flight',   leg: flight.inbound  },
               ].map(({ label, leg }) => (
-                <div key={label} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{label}</div>
-                  <div style={{ fontWeight: 600, marginBottom: 4 }}>{leg.depCode} → {leg.arrCode}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem', color: 'var(--muted)' }}>
-                    <span>{leg.dep}</span>
-                    <span style={{ color: 'var(--gold)' }}>→</span>
-                    <span>{leg.arr}</span>
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 2 }}>
-                    {flight.airline} · {leg.stopInfo}
+                <div key={label} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid #E2E2DC', textAlign: 'left' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#7A7A72', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4, fontWeight: 700 }}>{label}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1C2321', marginBottom: 4 }}>{leg.depCode} → {leg.arrCode}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem', color: '#555550', fontWeight: 500 }}>
+                    <span>{leg.dep}</span><span style={{ color: '#7A7A72' }}>→</span><span>{leg.arr}</span>
                   </div>
                 </div>
               ))}
 
-              {/* Price breakdown */}
-              <div style={{ marginTop: '0.5rem' }}>
-                {[
-                  { label: 'Base Fare', value: `${flight.currency}${baseFare}` },
-                  { label: 'Taxes & Fees', value: `${flight.currency}${taxes}` },
-                  ...(baggageFee ? [{ label: `${selectedBaggage}kg Baggage`, value: `+${flight.currency}${baggageFee}` }] : []),
-                ].map(r => (
-                  <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.83rem', marginBottom: '0.4rem', color: 'var(--muted)' }}>
-                    <span>{r.label}</span><span>{r.value}</span>
+              {/* Dynamic calculations list breakdown stack */}
+              <div style={{ marginTop: '0.5rem', textAlign: 'left' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.83rem', marginBottom: '0.5rem', color: '#555550', fontWeight: 500 }}>
+                  <span>Base Tickets ({passengers.length} × {flight.currency}{basePricePerTicket})</span>
+                  <span>{flight.currency}{basePricePerTicket * passengers.length}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.83rem', marginBottom: '0.5rem', color: '#555550', fontWeight: 500 }}>
+                  <span>Taxes ({passengers.length} × {flight.currency}{taxesPerTicket})</span>
+                  <span>{flight.currency}{taxesPerTicket * passengers.length}</span>
+                </div>
+                {totalBaggageFees > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.83rem', marginBottom: '0.5rem', color: '#555550', fontWeight: 500 }}>
+                    <span>Baggage Options Cost</span>
+                    <span>+{flight.currency}{totalBaggageFees}</span>
                   </div>
-                ))}
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  fontSize: '1rem', fontWeight: 700, color: 'var(--text)',
-                  marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)',
-                }}>
-                  <span>Total</span>
-                  <span style={{ color: 'var(--gold)' }}>{flight.currency}{total}</span>
+                )}
+                {totalSeatUpgrades > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.83rem', marginBottom: '0.5rem', color: '#555550', fontWeight: 500 }}>
+                    <span>Extra Legroom Upgrades</span>
+                    <span>+{flight.currency}{totalSeatUpgrades}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', fontWeight: 700, color: '#1C2321', marginTop: '0.85rem', paddingTop: '0.85rem', borderTop: '1px solid #E2E2DC' }}>
+                  <span>Total Due</span>
+                  <span>{flight.currency}{total}</span>
                 </div>
               </div>
 
-              {/* Secure notice */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'var(--muted)', margin: '0.75rem 0' }}>
-                <span>🔒</span> Secure booking · Price locked in
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: '#16a34a', margin: '1rem 0', fontWeight: 600, justifyContent: 'center' }}>
+                <span>🔒</span> Secure 256-Bit SSL Framework
               </div>
 
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: loading ? 1 : 1.01 }}
+                whileTap={{ scale: loading ? 1 : 0.99 }}
                 onClick={handleContinue}
                 disabled={loading}
-                style={{
-                  width: '100%', background: loading ? 'rgba(240,165,0,0.5)' : 'var(--gold)',
-                  color: '#000', border: 'none', padding: '12px',
-                  borderRadius: 10, fontWeight: 700, fontSize: '0.95rem',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  fontFamily: "'DM Sans', sans-serif",
-                }}
+                style={{ width: '100%', background: '#1C2321', color: '#FAF9F6', border: 'none', padding: '12px', borderRadius: 10, fontWeight: 700, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: "'DM Sans', sans-serif" }}
               >
-                {loading ? '⏳ Processing...' : 'Continue to Extras →'}
+                {loading ? '⏳ Processing...' : 'Complete Reservation →'}
               </motion.button>
-
-              <div style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.75rem' }}>
-                You can review your booking before payment
-              </div>
-            </div>
-
-            {/* Benefits card */}
-            <div style={{
-              marginTop: '1rem', background: 'linear-gradient(135deg, rgba(26,50,90,0.6), rgba(22,40,80,0.8))',
-              border: '1px solid var(--border)', borderRadius: 12, padding: '1rem',
-            }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--gold)' }}>
-                🌟 Unlock exclusive benefits
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '0.75rem' }}>
-                Sign in or create an account to earn points and get member discounts.
-              </div>
-              <button style={{
-                width: '100%', background: 'var(--navy3)', border: '1px solid var(--border)',
-                color: 'var(--text)', padding: '8px', borderRadius: 8,
-                fontSize: '0.8rem', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-              }}>
-                Sign In / Create Account
-              </button>
             </div>
           </div>
+
         </div>
       </div>
     </div>

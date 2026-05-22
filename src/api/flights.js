@@ -11,6 +11,50 @@ const api = axios.create({
 
 export const MOCK_FLIGHTS = [
   {
+    id: 'BA-101',
+    airline: 'British Airways',
+    airlineCode: 'BA',
+    logo: '🇬🇧',
+    outbound: {
+      dep: '13:20', arr: '16:05', depCode: 'MAN', arrCode: 'JFK',
+      duration: '7h 45m', stops: 0, stopInfo: 'Non Stop',
+      depDate: '24 May 2026', arrDate: '24 May 2026',
+    },
+    inbound: {
+      dep: '21:00', arr: '08:45', depCode: 'JFK', arrCode: 'MAN',
+      duration: '6h 45m', stops: 0, stopInfo: 'Non Stop',
+      depDate: '31 May 2026', arrDate: '01 Jun 2026',
+    },
+    price: 319,
+    currency: '£',
+    cabin: 'Economy',
+    seatsLeft: 3,
+    isBestValue: true,
+    amenities: ['wifi', 'meals', 'entertainment'],
+  },
+  {
+    id: 'VS-102',
+    airline: 'Virgin Atlantic',
+    airlineCode: 'VS',
+    logo: '🔴',
+    outbound: {
+      dep: '10:15', arr: '13:10', depCode: 'MAN', arrCode: 'JFK',
+      duration: '7h 55m', stops: 0, stopInfo: 'Non Stop',
+      depDate: '24 May 2026', arrDate: '24 May 2026',
+    },
+    inbound: {
+      dep: '18:30', arr: '06:15', depCode: 'JFK', arrCode: 'MAN',
+      duration: '6h 45m', stops: 0, stopInfo: 'Non Stop',
+      depDate: '31 May 2026', arrDate: '01 Jun 2026',
+    },
+    price: 349,
+    currency: '£',
+    cabin: 'Economy',
+    seatsLeft: 5,
+    isBestValue: false,
+    amenities: ['wifi', 'meals', 'entertainment'],
+  },
+  {
     id: 'QR-001',
     airline: 'Qatar Airways',
     airlineCode: 'QR',
@@ -29,14 +73,14 @@ export const MOCK_FLIGHTS = [
     currency: '£',
     cabin: 'Economy',
     seatsLeft: 4,
-    isBestValue: true,
+    isBestValue: false,
     amenities: ['wifi', 'meals', 'entertainment'],
   },
   {
     id: 'EK-002',
     airline: 'Emirates',
     airlineCode: 'EK',
-    logo: '🔴',
+    logo: '🇦🇪',
     outbound: {
       dep: '09:30', arr: '16:20', depCode: 'MAN', arrCode: 'JFK',
       duration: '19h 50m', stops: 1, stopInfo: '1 Stop · DXB',
@@ -58,7 +102,7 @@ export const MOCK_FLIGHTS = [
     id: 'TK-003',
     airline: 'Turkish Airlines',
     airlineCode: 'TK',
-    logo: '🔵',
+    logo: '🇹🇷',
     outbound: {
       dep: '07:20', arr: '15:05', depCode: 'MAN', arrCode: 'JFK',
       duration: '12h 45m', stops: 1, stopInfo: '1 Stop · IST',
@@ -77,40 +121,18 @@ export const MOCK_FLIGHTS = [
     amenities: ['meals', 'entertainment'],
   },
   {
-    id: 'BA-004',
-    airline: 'British Airways',
-    airlineCode: 'BA',
-    logo: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-    outbound: {
-      dep: '11:15', arr: '18:45', depCode: 'MAN', arrCode: 'JFK',
-      duration: '12h 30m', stops: 1, stopInfo: '1 Stop · LHR',
-      depDate: '24 May 2026', arrDate: '24 May 2026',
-    },
-    inbound: {
-      dep: '21:30', arr: '08:20', depCode: 'JFK', arrCode: 'MAN',
-      duration: '9h 50m', stops: 1, stopInfo: '1 Stop · LHR',
-      depDate: '31 May 2026', arrDate: '01 Jun 2026',
-    },
-    price: 489,
-    currency: '£',
-    cabin: 'Economy',
-    seatsLeft: 3,
-    isBestValue: false,
-    amenities: ['wifi', 'meals'],
-  },
-  {
     id: 'AF-005',
     airline: 'Air France',
     airlineCode: 'AF',
     logo: '🇫🇷',
     outbound: {
       dep: '10:40', arr: '18:05', depCode: 'MAN', arrCode: 'JFK',
-      duration: '12h 25m', stops: 1, stopInfo: '1 Stop · CDG',
+      duration: '15h 25m', stops: 2, stopInfo: '2+ Stops · CDG',
       depDate: '24 May 2026', arrDate: '24 May 2026',
     },
     inbound: {
       dep: '20:15', arr: '08:35', depCode: 'JFK', arrCode: 'MAN',
-      duration: '7h 20m', stops: 1, stopInfo: '1 Stop · CDG',
+      duration: '14h 20m', stops: 2, stopInfo: '2+ Stops · CDG',
       depDate: '31 May 2026', arrDate: '01 Jun 2026',
     },
     price: 499,
@@ -141,15 +163,9 @@ export const DESTINATIONS = [
 
 // ─── API FUNCTIONS ─────────────────────────────────────────────────────────────
 
-/**
- * Search for available flights.
- * Replace the mock with: return api.get('/flights/search', { params })
- */
 export async function searchFlights(params) {
-  // Simulate network delay
   await new Promise(r => setTimeout(r, 800))
 
-  // Filter mock data based on max price if provided
   let results = [...MOCK_FLIGHTS]
   if (params?.maxPrice) {
     results = results.filter(f => f.price <= params.maxPrice)
@@ -161,10 +177,6 @@ export async function searchFlights(params) {
   return { data: results, total: results.length }
 }
 
-/**
- * Get details for a single flight by ID.
- * Replace with: return api.get(`/flights/${id}`)
- */
 export async function getFlightDetails(id) {
   await new Promise(r => setTimeout(r, 400))
   const flight = MOCK_FLIGHTS.find(f => f.id === id)
@@ -172,14 +184,9 @@ export async function getFlightDetails(id) {
   return { data: flight }
 }
 
-/**
- * Create a booking.
- * Replace with: return api.post('/bookings', payload)
- */
 export async function createBooking(payload) {
   await new Promise(r => setTimeout(r, 1200))
 
-  // Simulate occasional failure (5% chance) — good for testing error states
   if (Math.random() < 0.05) {
     throw new Error('Payment gateway timeout. Please try again.')
   }
@@ -194,10 +201,6 @@ export async function createBooking(payload) {
   }
 }
 
-/**
- * Get date price grid for a route.
- * Replace with: return api.get('/flights/prices', { params })
- */
 export async function getDatePrices(params) {
   await new Promise(r => setTimeout(r, 300))
   return { data: DATE_PRICES }
